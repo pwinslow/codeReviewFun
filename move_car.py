@@ -20,66 +20,77 @@
 - Variable/function names seem pretty readable (to me)
 '''
 
-directions = ['N','E','S','W']
-movement = {'N': (0,1), 'E': (1,0), 'S': (0,-1), 'W':(-1,0)}
-commands = {'L': 'turn_left', 'R': 'turn_right', 'M': 'move'}
 
-GRID_MAX_X, GRID_MAX_Y = map(int, raw_input().split())
 
-# You define first_vehicle_x/y here and then don't use them until you redefine them on lines 55+56.
-# Why not just define them once on 55+56?
+
+
 first_vehicle_x = None
 first_vehicle_y = None
 
 class Vehicle():
-    def __init__(self, x, y, face):
+
+    directions = ['N','E','S','W']
+    movement = {'N': (0,1), 'E': (1,0), 'S': (0,-1), 'W':(-1,0)}
+
+    def __init__(self, x, y, face, boundaries):
         self.x = x
         self.y = y
         self.dir = face
+        self.grid_max_x, self.grid_max_y = boundaries
 
-    # The code in both turn_ methods is pretty bunched up and thus hard to read
     def turn_left(self):
-        self.dir = directions[(directions.index(self.dir)-1)%len(directions)]
+        self.dir = self.directions[ ( self.directions.index(self.dir) - 1 ) % len(self.directions) ]
 
     def turn_right(self):
-        self.dir = directions[(directions.index(self.dir)+1)%len(directions)]
+        self.dir = self.directions[ ( self.directions.index(self.dir) + 1 ) % len(self.directions) ]
+
+    def turn_around(self):
+        self.dir = self.directions[ ( self.directions.index(self.dir) + 2 ) % len(self.directions) ]
 
     def move(self):
-        new_x = self.x + movement[self.dir][0]
-        new_y = self.y + movement[self.dir][1]
+        new_x = self.x + self.movement[self.dir][0]
+        new_y = self.y + self.movement[self.dir][1]
 
-        # I can see my way through this but I kind of have to squint. This looks like the
-        # "code smell" issue that AJ mentioned...
         if new_x != first_vehicle_x or new_y != first_vehicle_y:
-            if new_x in xrange(GRID_MAX_X+1):
+            if new_x in xrange(self.grid_max_x+1):
                 self.x = new_x
-            if new_y in xrange(GRID_MAX_Y+1):
+            if new_y in xrange(self.grid_max_y+1):
                 self.y = new_y
 
-vehicle_one_pos = raw_input().split()
-vehicle_one_commands = raw_input()
+def collect_user_info():
 
-# Be more explicit in terms of what you're passing here, i.e., don't pass elements of a list, pass variables
-# key-values pairs with a inputs** after making it clear what inputs is
-vehicle_one = Vehicle(int(vehicle_one_pos[0]), int(vehicle_one_pos[1]), vehicle_one_pos[2])
-for command in vehicle_one_commands:
-    eval("vehicle_one.{0}()".format(commands[command]))
+    GRID_MAX_X, GRID_MAX_Y = map(int, raw_input().split())
 
-# These two variables are defined twice but never used
-first_vehicle_x = vehicle_one.x
-first_vehicle_y = vehicle_one.y
+    vehicle_one_pos = raw_input().split()
+    vehicle_one_commands = raw_input()
 
+    vehicle_two_pos = raw_input().split()
+    vehicle_two_commands = raw_input()
 
-vehicle_two_pos = raw_input().split()
-vehicle_two_commands = raw_input()
+    return GRID_MAX_X, GRID_MAX_Y, vehicle_one_pos, vehicle_one_commands, vehicle_two_pos, vehicle_two_commands
 
-vehicle_two = Vehicle(int(vehicle_two_pos[0]), int(vehicle_two_pos[1]), vehicle_two_ps[2])
-for command in vehicle_two_commands:
-    eval("vehicle_two.{0}()".format(commands[command]))
+def main():
 
-# The last 25 lines or so contains an unnecessary repetition. Should design a function
+    commands = {'L': 'turn_left', 'R': 'turn_right', 'M': 'move', 'T': 'turn_around'}
 
+    (GRID_MAX_X,
+    GRID_MAX_Y,
+    vehicle_one_pos,
+    vehicle_one_commands,
+    vehicle_two_pos,
+    vehicle_two_commands) = collect_user_info()
 
-# These print statements are also a repetition. Make a function...
-print vehicle_one.x, vehicle_one.y, vehicle_one.dir
-print vehicle_two.x, vehicle_two.y, vehicle_two.dir
+    # The next few lines are repeats and should be fixed but ... reasons ...
+    vehicle_one = Vehicle(int(vehicle_one_pos[0]), int(vehicle_one_pos[1]), vehicle_one_pos[2], (GRID_MAX_X, GRID_MAX_Y))
+    for command in vehicle_one_commands:
+        eval("vehicle_one.{0}()".format(commands[command]))
+
+    vehicle_two = Vehicle(int(vehicle_two_pos[0]), int(vehicle_two_pos[1]), vehicle_two_pos[2], (GRID_MAX_X, GRID_MAX_Y))
+    for command in vehicle_two_commands:
+        eval("vehicle_two.{0}()".format(commands[command]))
+
+    print vehicle_one.x, vehicle_one.y, vehicle_one.dir
+    print vehicle_two.x, vehicle_two.y, vehicle_two.dir
+
+if __name__ == "__main__":
+    main()
